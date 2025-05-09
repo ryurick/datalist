@@ -28,76 +28,94 @@ const Done: React.FC = () => {
     <Layout>
       <Box
         sx={{
-          maxWidth: 600,
-          mx: "auto",
-          mt: 25,
-          textAlign: "center",
-          p: 3,
-          bgcolor: "#fce4ec",
-          borderRadius: 2,
+          minHeight: "100vh",
+          background: "linear-gradient(to bottom right, #e0f7fa, #f1f8e9)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          px: 2,
         }}
       >
-        <Typography
-          variant="h4"
-          component="h2"
-          gutterBottom
-          sx={{ fontFamily: "'Yomogi', sans-serif", color: "#333" }}
-        >
-          グループが作成されました！
-        </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={handleCopyUrl}
+        <Box
           sx={{
-            fontFamily: "'Yomogi', sans-serif",
-            fontWeight: "bold",
-            fontSize: "0.875rem",
-            mb: 2,
-          }}
-        >
-          URLをコピー
-        </Button>
-        <Typography
-          variant="body1"
-          gutterBottom
-          sx={{ fontFamily: "'Yomogi', sans-serif", color: "#555" }}
-        >
-          以下のURLを共有して、友達と一緒に楽しみましょう。
-        </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          gutterBottom
-          sx={{
-            fontFamily: "'Yomogi', sans-serif",
-            fontSize: "0.875rem",
-            wordBreak: "break-all",
+            maxWidth: 600,
+            mx: "auto",
+            textAlign: "center",
+            p: 3,
             bgcolor: "#ffffff",
-            p: 1,
-            borderRadius: 1,
-            mb: 2,
+            borderRadius: 2,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+            position: "relative",
+            top: "-5vh",
           }}
         >
-          {url}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenList}
-          sx={{
-            fontFamily: "'Yomogi', sans-serif",
-            fontWeight: "bold",
-            fontSize: "0.875rem",
-            bgcolor: "#f8bbd0",
-            textTransform: "none",
-            "&:hover": {
-              bgcolor: "#f48fb1",
-            },
-          }}
-        >
-          DateListをひらく
-        </Button>
+          <Typography
+            variant="h4"
+            component="h2"
+            gutterBottom
+            sx={{ fontFamily: "'Yomogi', sans-serif", color: "#333" }}
+          >
+            グループが作成されました！
+          </Typography>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{ fontFamily: "'Yomogi', sans-serif", color: "#555" }}
+          >
+            以下のURLを共有して、恋人・友達と一緒に楽しみましょう。
+          </Typography>
+          <Box
+            sx={{
+              bgcolor: "#f0f4f8",
+              p: 2,
+              borderRadius: 1,
+              mb: 2,
+              wordBreak: "break-all",
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                fontFamily: "'Yomogi', sans-serif",
+                fontSize: "0.875rem",
+              }}
+            >
+              {url}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleCopyUrl}
+              sx={{
+                fontFamily: "'Yomogi', sans-serif",
+                fontWeight: "bold",
+                fontSize: "0.875rem",
+              }}
+            >
+              URLをコピー
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenList}
+              sx={{
+                fontFamily: "'Yomogi', sans-serif",
+                fontWeight: "bold",
+                fontSize: "0.875rem",
+                bgcolor: "#80cbc4",
+                textTransform: "none",
+                "&:hover": {
+                  bgcolor: "#4db6ac",
+                },
+              }}
+            >
+              GoListをひらく
+            </Button>
+          </Box>
+        </Box>
       </Box>
     </Layout>
   );

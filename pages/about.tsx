@@ -12,6 +12,7 @@ const About: React.FC = () => {
           mt: 8,
           textAlign: "center",
           p: 2,
+          bgcolor: "#f1f8e9", // 淡いグリーン
         }}
       >
         <Typography
@@ -27,7 +28,7 @@ const About: React.FC = () => {
           gutterBottom
           sx={{ fontFamily: "'Yomogi', sans-serif", color: "#555" }}
         >
-          DateListは、あなたとあなたの大切な人が行きたい場所ややりたいことを簡単に共有できるアプリです。
+          GoListは、あなたとあなたの大切な人が行きたい場所ややりたいことを簡単に共有できるアプリです。
           楽しい思い出を一緒に作りましょう！
         </Typography>
       </Box>

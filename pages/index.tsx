@@ -15,7 +15,7 @@ const Home: React.FC = () => {
       <Box
         sx={{
           minHeight: "100vh",
-          background: "linear-gradient(to bottom right, #fff0f5, #ffe4e1)",
+          background: "linear-gradient(to bottom right, #e0f7fa, #f1f8e9)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -30,10 +30,10 @@ const Home: React.FC = () => {
             p: 4,
             borderRadius: "24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-            backgroundColor: "#fff",
+            backgroundColor: "#ffffff",
             textAlign: "center",
             position: "relative",
-            top: "-10vh", // ← ここで上にずらす
+            top: "-10vh",
           }}
         >
           <Typography
@@ -43,10 +43,10 @@ const Home: React.FC = () => {
             sx={{
               fontFamily: "'Caveat', cursive",
               fontSize: "3rem",
-              color: "#e91e63",
+              color: "#4caf50",
             }}
           >
-            DateList
+            GoList
           </Typography>
           <Typography
             variant="body1"
@@ -71,13 +71,11 @@ const Home: React.FC = () => {
               fontSize: "1rem",
               px: 4,
               py: 1.5,
-              borderRadius: "32px",
-              bgcolor: "#f48fb1",
+              borderRadius: "24px",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               transition: "0.3s",
               "&:hover": {
-                bgcolor: "#f06292",
-                transform: "scale(1.03)",
+                transform: "scale(1.05)",
               },
             }}
           >

@@ -41,7 +41,7 @@ const Layout: React.FC<PropsWithChildren> = ({ children }) => {
             }}
             onClick={handleTitleClick}
           >
-            DateList
+            GoList
           </Typography>
           <Button
             color="inherit"
@@ -75,7 +75,7 @@ const Layout: React.FC<PropsWithChildren> = ({ children }) => {
         }}
       >
         <Typography variant="body2" color="textSecondary">
-          © 2025 DateList
+          © 2025 GoList
         </Typography>
       </Box>
     </Box>

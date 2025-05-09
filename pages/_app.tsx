@@ -1,18 +1,19 @@
 import React from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import "./styles.css";
 import type { AppProps } from "next/app";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#f48fb1", // ピンク系の色をヘッダーに
+      main: "#a5d6a7", // 淡いグリーン
     },
     secondary: {
-      main: "#90caf9", // ブルー系の色をアクセントに
+      main: "#ffcc80", // 淡いオレンジ
     },
     background: {
-      default: "#f5f5f5", // 明るいグレー
+      default: "#f0f4f8", // 淡いグレー
       paper: "#ffffff", // 白
     },
     text: {
@@ -58,7 +59,27 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          fontFamily: "'Kosugi Maru', sans-serif", // ボタンのフォントをKosugi Maruに変更
+          fontFamily: "'Kosugi Maru', sans-serif",
+          fontWeight: "bold",
+          fontSize: "1rem",
+          borderRadius: "24px",
+          textTransform: "none",
+          transition: "0.3s",
+          "&:hover": {
+            transform: "scale(1.05)",
+          },
+        },
+        containedPrimary: {
+          backgroundColor: "#aed581", // 淡いグリーン
+          "&:hover": {
+            backgroundColor: "#9ccc65", // 少し濃いグリーン
+          },
+        },
+        containedSecondary: {
+          backgroundColor: "#ffcc80", // 淡いオレンジ
+          "&:hover": {
+            backgroundColor: "#ffb74d", // 少し濃いオレンジ
+          },
         },
       },
     },

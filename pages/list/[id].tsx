@@ -29,7 +29,7 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import Layout from "../../components/Layout";
 import { useRouter } from "next/router";
-import "../styles.css"; // CSSファイルをインポート
+
 import { supabase } from "../../supabaseClient";
 
 // Placeの型定義
@@ -387,16 +387,20 @@ const ListPage: React.FC = () => {
       <Box
         sx={{
           maxWidth: 800,
+          background: "linear-gradient(to bottom right, #e0f7fa, #f1f8e9)",
           mx: "auto",
           height: "calc(100vh - 120px)",
           display: "flex",
           flexDirection: "column",
           px: 2,
           py: 1,
+          bgcolor: "#f0f4f8",
+          borderRadius: 2,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
         }}
       >
         {/* グループ名表示と編集 */}
-        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
           {isEditingGroupName ? (
             <TextField
               value={groupName}
@@ -405,6 +409,11 @@ const ListPage: React.FC = () => {
               fullWidth
               size="small"
               autoFocus
+              sx={{
+                bgcolor: "#ffffff",
+                borderRadius: 1,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              }}
             />
           ) : (
             <>
@@ -419,9 +428,9 @@ const ListPage: React.FC = () => {
         {/* 入力欄 */}
         <Box
           component="form"
-          sx={{ mb: 2, border: "1px solid #ccc", borderRadius: 2, p: 2 }}
+          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 1 }}
         >
-          <Stack spacing={2}>
+          <Stack spacing={1}>
             <TextField
               label="タイトル"
               value={title}
@@ -429,6 +438,7 @@ const ListPage: React.FC = () => {
               fullWidth
               size="small"
               required
+              sx={{ bgcolor: "#ffffff" }}
             />
             <TextField
               label="メモ"
@@ -436,6 +446,7 @@ const ListPage: React.FC = () => {
               onChange={(e) => setNote(e.target.value)}
               fullWidth
               size="small"
+              sx={{ bgcolor: "#ffffff" }}
             />
             <TextField
               label="URL"
@@ -443,6 +454,7 @@ const ListPage: React.FC = () => {
               onChange={(e) => setUrl(e.target.value)}
               fullWidth
               size="small"
+              sx={{ bgcolor: "#ffffff" }}
             />
             <Select
               value={selectedMember}
@@ -450,6 +462,7 @@ const ListPage: React.FC = () => {
               displayEmpty
               fullWidth
               size="small"
+              sx={{ bgcolor: "#ffffff" }}
             >
               <MenuItem value="" disabled>
                 メンバーを選択
@@ -463,16 +476,18 @@ const ListPage: React.FC = () => {
             <Box textAlign="right">
               <Button
                 variant="contained"
-                onClick={handleAddPlace}
-                size="small"
+                color="primary"
                 sx={{
-                  fontWeight: "bold",
-                  backgroundColor: "#ffb6b9",
-                  ":hover": {
-                    backgroundColor: "#ff8fa3",
+                  bgcolor: "#a5d6a7",
+                  "&:hover": {
+                    bgcolor: "#81c784",
                   },
-                  transition: "all 0.3s ease",
+                  fontFamily: "'Kosugi Maru', sans-serif",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  textTransform: "none",
                 }}
+                onClick={handleAddPlace}
               >
                 追加
               </Button>
@@ -481,7 +496,31 @@ const ListPage: React.FC = () => {
         </Box>
 
         {/* タブとリスト */}
-        <Tabs value={tabIndex} onChange={handleTabChange} centered>
+        <Tabs
+          value={tabIndex}
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          sx={{
+            bgcolor: "#ffffff",
+            borderRadius: 1,
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            "& .MuiTab-root": {
+              fontFamily: "'Kosugi Maru', sans-serif",
+              fontWeight: "bold",
+              color: "#607d8b",
+              "&.Mui-selected": {
+                color: "#004d40",
+                bgcolor: "#a5d6a7",
+                borderRadius: 1,
+              },
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#004d40",
+            },
+          }}
+        >
           <Tab label="行きたい場所" />
           <Tab label="行った場所" />
           <Tab label="お気に入り" />
@@ -504,9 +543,36 @@ const ListPage: React.FC = () => {
                     sx={{
                       mb: 1,
                       boxShadow: 2,
-                      backgroundColor: "#ffe4e1",
+                      backgroundColor: place.favorite
+                        ? "#fff8e1" // お気に入り（ゴールド系）
+                        : place.visited
+                        ? "#dcedc8" // 行った場所（グリーン）
+                        : "#fce4ec", // 行きたい場所（ピンク）
                       cursor: "pointer",
-                      height: 100,
+                      height: 80,
+                      borderLeft: place.favorite
+                        ? "5px solid #ffca28"
+                        : undefined,
+                      transition: "0.2s ease",
+                      "&:hover": {
+                        boxShadow: 4,
+                        transform: "translateY(-2px)",
+                      },
+                      "&:focus": {
+                        outline: "none",
+                        backgroundColor: place.favorite
+                          ? "#fff8e1"
+                          : place.visited
+                          ? "#dcedc8"
+                          : "#fce4ec",
+                      },
+                      "&:active": {
+                        backgroundColor: place.favorite
+                          ? "#ffe082"
+                          : place.visited
+                          ? "#c8e6c9"
+                          : "#f8bbd0",
+                      },
                     }}
                   >
                     <CardContent
@@ -517,6 +583,7 @@ const ListPage: React.FC = () => {
                         flexDirection: "column",
                         justifyContent: "space-between",
                         height: "100%",
+                        fontFamily: "'Kosugi Maru', sans-serif",
                       }}
                     >
                       <ListItem
@@ -531,13 +598,14 @@ const ListPage: React.FC = () => {
                         <ListItemText
                           primary={
                             <Typography
-                              variant="body1"
+                              variant="body2"
                               sx={{
                                 fontWeight: "bold",
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 mb: 0.5,
+                                fontFamily: "'Kosugi Maru', sans-serif",
                               }}
                             >
                               {place.title}
@@ -551,6 +619,7 @@ const ListPage: React.FC = () => {
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
+                                fontFamily: "'Kosugi Maru', sans-serif",
                               }}
                             >
                               <Box sx={{ mb: 0.5 }}>
@@ -570,6 +639,9 @@ const ListPage: React.FC = () => {
                                       href={place.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
+                                      style={{
+                                        fontFamily: "'Kosugi Maru', sans-serif",
+                                      }}
                                     >
                                       URL
                                     </a>
@@ -603,27 +675,38 @@ const ListPage: React.FC = () => {
                               }
                             >
                               {place.favorite ? (
-                                <StarIcon color="warning" fontSize="small" />
+                                <StarIcon color="warning" fontSize="medium" />
                               ) : (
-                                <StarBorderIcon fontSize="small" />
+                                <StarBorderIcon fontSize="medium" />
                               )}
                             </IconButton>
                             <Checkbox
-                              size="small"
-                              color="primary"
+                              size="medium"
+                              sx={{
+                                color: "defaultColor",
+                                "&.Mui-checked": {
+                                  color: "#66bb6a",
+                                },
+                              }}
                               checked={checkedAnimationIndex === index}
                               className={
                                 checkedAnimationIndex === index
                                   ? "checkmark-animation"
                                   : ""
                               }
-                              onClick={(e) => handleToggleVisited(index, e)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleVisited(index, e);
+                              }}
                             />
                           </Box>
                           <Typography
                             variant="caption"
                             display="block"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                              textAlign: "center",
+                              fontFamily: "'Kosugi Maru', sans-serif",
+                            }}
                           >
                             作成者: {place.member}
                           </Typography>
@@ -644,20 +727,42 @@ const ListPage: React.FC = () => {
                   key={index}
                   sx={{
                     mb: 1,
-                    boxShadow: 1,
-                    backgroundColor: "#e8f5e9",
+                    boxShadow: 2,
+                    backgroundColor: "#e8f5e9", // ナチュラルグリーン
+                    borderLeft: "6px solid #81c784", // グリーンアクセント
                     cursor: "pointer",
-                    height: 120,
+                    height: 80,
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: 4,
+                    },
+                    "&:focus": {
+                      outline: "none",
+                      backgroundColor: place.favorite
+                        ? "#fff8e1"
+                        : place.visited
+                        ? "#dcedc8"
+                        : "#fce4ec",
+                    },
+                    "&:active": {
+                      backgroundColor: place.favorite
+                        ? "#ffe082"
+                        : place.visited
+                        ? "#c8e6c9"
+                        : "#f8bbd0",
+                    },
                   }}
                 >
                   <CardContent
                     sx={{
-                      py: 1,
-                      px: 2,
+                      py: 0.5,
+                      px: 1.5,
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
                       height: "100%",
+                      fontFamily: "'Kosugi Maru', sans-serif",
                     }}
                   >
                     <ListItem
@@ -666,19 +771,20 @@ const ListPage: React.FC = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        gap: 2,
+                        gap: 1.5,
                       }}
                     >
                       <ListItemText
                         primary={
                           <Typography
-                            variant="subtitle1"
+                            variant="body2"
                             sx={{
                               fontWeight: "bold",
                               whiteSpace: "nowrap",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
-                              mb: 1,
+                              mb: 0.5,
+                              fontFamily: "'Kosugi Maru', sans-serif",
                             }}
                           >
                             {place.title}
@@ -692,9 +798,10 @@ const ListPage: React.FC = () => {
                               whiteSpace: "nowrap",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
+                              fontFamily: "'Kosugi Maru', sans-serif",
                             }}
                           >
-                            <Box sx={{ mb: 1 }}>
+                            <Box sx={{ mb: 0.5 }}>
                               {place.note && `${place.note}`}
                             </Box>
                             <Box
@@ -702,7 +809,7 @@ const ListPage: React.FC = () => {
                                 display: "flex",
                                 justifyContent: "space-between",
                                 alignItems: "center",
-                                mt: 0.5,
+                                mt: 0.25,
                               }}
                             >
                               <Box>
@@ -711,6 +818,9 @@ const ListPage: React.FC = () => {
                                     href={place.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    style={{
+                                      fontFamily: "'Kosugi Maru', sans-serif",
+                                    }}
                                   >
                                     URL
                                   </a>
@@ -725,8 +835,8 @@ const ListPage: React.FC = () => {
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
-                          gap: 0.5,
-                          minWidth: 100,
+                          gap: 0.25,
+                          minWidth: 80,
                         }}
                       >
                         <Box
@@ -734,23 +844,30 @@ const ListPage: React.FC = () => {
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
-                            gap: 1,
+                            gap: 0.5,
                           }}
                         >
                           <IconButton
+                            size="small"
                             onClick={(e) =>
                               handleToggleFavorite(index, true, e)
                             }
                             disabled={true}
                           >
                             {place.favorite ? (
-                              <StarIcon color="warning" />
+                              <StarIcon color="warning" fontSize="medium" />
                             ) : (
-                              <StarBorderIcon />
+                              <StarBorderIcon fontSize="medium" />
                             )}
                           </IconButton>
                           <Checkbox
-                            color="primary"
+                            size="medium"
+                            sx={{
+                              color: "defaultColor",
+                              "&.Mui-checked": {
+                                color: "#66bb6a",
+                              },
+                            }}
                             checked={true}
                             onClick={(e) => handleToggleUnvisited(index, e)}
                           />
@@ -758,7 +875,10 @@ const ListPage: React.FC = () => {
                         <Typography
                           variant="caption"
                           display="block"
-                          sx={{ textAlign: "center" }}
+                          sx={{
+                            textAlign: "center",
+                            fontFamily: "'Kosugi Maru', sans-serif",
+                          }}
                         >
                           作成者: {place.member}
                         </Typography>
@@ -780,20 +900,42 @@ const ListPage: React.FC = () => {
                     key={index}
                     sx={{
                       mb: 1,
-                      boxShadow: 1,
-                      backgroundColor: place.favorite ? "#fff9c4" : "#f0f4c3",
+                      boxShadow: 2,
+                      backgroundColor: "#fffde7", // 淡いイエローで柔らかく
+                      borderLeft: "6px solid #ffd54f", // ゴールド寄りのアクセント
                       cursor: "pointer",
-                      height: 120,
+                      height: 80,
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: 4,
+                      },
+                      "&:focus": {
+                        outline: "none",
+                        backgroundColor: place.favorite
+                          ? "#fff8e1"
+                          : place.visited
+                          ? "#dcedc8"
+                          : "#fce4ec",
+                      },
+                      "&:active": {
+                        backgroundColor: place.favorite
+                          ? "#ffe082"
+                          : place.visited
+                          ? "#c8e6c9"
+                          : "#f8bbd0",
+                      },
                     }}
                   >
                     <CardContent
                       sx={{
-                        py: 1,
-                        px: 2,
+                        py: 0.5,
+                        px: 1.5,
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
                         height: "100%",
+                        fontFamily: "'Kosugi Maru', sans-serif",
                       }}
                     >
                       <ListItem
@@ -802,19 +944,20 @@ const ListPage: React.FC = () => {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          gap: 2,
+                          gap: 1.5,
                         }}
                       >
                         <ListItemText
                           primary={
                             <Typography
-                              variant="subtitle1"
+                              variant="body2"
                               sx={{
                                 fontWeight: "bold",
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
-                                mb: 1,
+                                mb: 0.5,
+                                fontFamily: "'Kosugi Maru', sans-serif",
                               }}
                             >
                               {place.title}
@@ -828,9 +971,10 @@ const ListPage: React.FC = () => {
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
+                                fontFamily: "'Kosugi Maru', sans-serif",
                               }}
                             >
-                              <Box sx={{ mb: 1 }}>
+                              <Box sx={{ mb: 0.5 }}>
                                 {place.note && `${place.note}`}
                               </Box>
                               <Box
@@ -838,7 +982,7 @@ const ListPage: React.FC = () => {
                                   display: "flex",
                                   justifyContent: "space-between",
                                   alignItems: "center",
-                                  mt: 0.5,
+                                  mt: 0.25,
                                 }}
                               >
                                 <Box>
@@ -847,6 +991,9 @@ const ListPage: React.FC = () => {
                                       href={place.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
+                                      style={{
+                                        fontFamily: "'Kosugi Maru', sans-serif",
+                                      }}
                                     >
                                       URL
                                     </a>
@@ -861,8 +1008,8 @@ const ListPage: React.FC = () => {
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: 0.5,
-                            minWidth: 100,
+                            gap: 0.25,
+                            minWidth: 80,
                           }}
                         >
                           <Box
@@ -870,25 +1017,29 @@ const ListPage: React.FC = () => {
                               display: "flex",
                               flexDirection: "row",
                               alignItems: "center",
-                              gap: 1,
+                              gap: 0.5,
                             }}
                           >
                             <IconButton
+                              size="small"
                               onClick={(e) =>
                                 handleToggleFavorite(index, place.visited, e)
                               }
                             >
                               {place.favorite ? (
-                                <StarIcon color="warning" />
+                                <StarIcon color="warning" fontSize="medium" />
                               ) : (
-                                <StarBorderIcon />
+                                <StarBorderIcon fontSize="medium" />
                               )}
                             </IconButton>
                           </Box>
                           <Typography
                             variant="caption"
                             display="block"
-                            sx={{ textAlign: "center" }}
+                            sx={{
+                              textAlign: "center",
+                              fontFamily: "'Kosugi Maru', sans-serif",
+                            }}
                           >
                             作成者: {place.member}
                           </Typography>
@@ -906,7 +1057,7 @@ const ListPage: React.FC = () => {
           open={openSnackbar}
           autoHideDuration={2000}
           onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert
             onClose={handleSnackbarClose}
@@ -921,7 +1072,7 @@ const ListPage: React.FC = () => {
         <Dialog
           open={editPlace !== null}
           onClose={() => setEditPlace(null)}
-          sx={{ "& .MuiDialog-paper": { margin: "auto", maxWidth: "500px" } }}
+          sx={{ "& .MuiDialog-paper": { margin: "auto", maxWidth: "600px" } }}
         >
           <DialogTitle>編集</DialogTitle>
           <DialogContent>

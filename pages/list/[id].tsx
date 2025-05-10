@@ -555,7 +555,7 @@ const ListPage: React.FC = () => {
               }}
             >
               <MenuItem value="" disabled sx={{ textAlign: "center" }}>
-                メンバーを選択
+                作成者を選択
               </MenuItem>
               {members.map((member, index) => (
                 <MenuItem key={index} value={member}>

@@ -27,6 +27,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Layout from "../../components/Layout";
 import { useRouter } from "next/router";
 
@@ -61,6 +62,8 @@ const ListPage: React.FC = () => {
   >(null);
   const [members, setMembers] = useState<string[]>([]);
   const [selectedMember, setSelectedMember] = useState("");
+  const [newMember, setNewMember] = useState("");
+  const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,7 +184,7 @@ const ListPage: React.FC = () => {
     };
 
     // データベースに新しい場所を挿入
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("places")
       .insert([{ ...newPlace, groupid: groupId }]);
 
@@ -189,6 +192,8 @@ const ListPage: React.FC = () => {
       console.error("Error adding place:", error);
       return;
     }
+
+    console.log("Inserted data:", data);
 
     // データを再取得
     const { data: placesData, error: placesError } = await supabase
@@ -382,6 +387,38 @@ const ListPage: React.FC = () => {
     setEditIndex(null);
   };
 
+  const handleAddOrEditMember = () => {
+    if (newMember.trim() === "") {
+      alert("メンバー名を入力してください。");
+      return;
+    }
+
+    if (editIndex !== null) {
+      // 編集モード
+      const updatedMembers = [...members];
+      updatedMembers[editIndex] = newMember;
+      setMembers(updatedMembers);
+      setEditIndex(null);
+    } else {
+      // 追加モード
+      setMembers((prev) => [...prev, newMember]);
+    }
+
+    setNewMember("");
+    setIsMemberDialogOpen(false);
+  };
+
+  const handleEditMember = (index: number) => {
+    setNewMember(members[index]);
+    setEditIndex(index);
+    setIsMemberDialogOpen(true);
+  };
+
+  const handleDeleteMember = (index: number) => {
+    const updatedMembers = members.filter((_, i) => i !== index);
+    setMembers(updatedMembers);
+  };
+
   return (
     <Layout>
       <Box
@@ -389,7 +426,7 @@ const ListPage: React.FC = () => {
           maxWidth: 800,
           background: "linear-gradient(to bottom right, #e0f7fa, #f1f8e9)",
           mx: "auto",
-          height: "calc(100vh - 120px)",
+          height: "calc(100vh - 80px)",
           display: "flex",
           flexDirection: "column",
           px: 2,
@@ -428,33 +465,51 @@ const ListPage: React.FC = () => {
         {/* 入力欄 */}
         <Box
           component="form"
-          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 1 }}
+          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 0.5 }}
         >
           <Stack spacing={1}>
             <TextField
-              label="タイトル"
+              label="行きたいところ"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
               size="small"
               required
-              sx={{ bgcolor: "#ffffff" }}
+              sx={{
+                bgcolor: "#ffffff",
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(0, 0, 0, 0.4)",
+                },
+              }}
+              placeholder="例: 京都金閣寺"
             />
             <TextField
-              label="メモ"
+              label="コメント or 詳細 (任意)"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               fullWidth
               size="small"
-              sx={{ bgcolor: "#ffffff" }}
+              sx={{
+                bgcolor: "#ffffff",
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(0, 0, 0, 0.4)",
+                },
+              }}
+              placeholder="例: 紅葉が最高！写真映えスポットだよ"
             />
             <TextField
-              label="URL"
+              label="GoogleMapUrl or HP URL (任意)"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               fullWidth
               size="small"
-              sx={{ bgcolor: "#ffffff" }}
+              sx={{
+                bgcolor: "#ffffff",
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(0, 0, 0, 0.4)",
+                },
+              }}
+              placeholder="例: https://www.shokoku-ji.jp/kinkakuji/"
             />
             <Select
               value={selectedMember}
@@ -473,10 +528,18 @@ const ListPage: React.FC = () => {
                 </MenuItem>
               ))}
             </Select>
-            <Box textAlign="right">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 2,
+                gap: 2,
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
+                onClick={() => setIsMemberDialogOpen(true)}
                 sx={{
                   bgcolor: "#a5d6a7",
                   "&:hover": {
@@ -487,7 +550,23 @@ const ListPage: React.FC = () => {
                   fontSize: "1rem",
                   textTransform: "none",
                 }}
+              >
+                メンバー管理
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={handleAddPlace}
+                sx={{
+                  bgcolor: "#a5d6a7",
+                  "&:hover": {
+                    bgcolor: "#81c784",
+                  },
+                  fontFamily: "'Kosugi Maru', sans-serif",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  textTransform: "none",
+                }}
               >
                 追加
               </Button>
@@ -531,7 +610,6 @@ const ListPage: React.FC = () => {
             flex: 1,
             overflowY: "auto",
             borderTop: "2px solid #ccc",
-            pt: 2,
           }}
         >
           {tabIndex === 0 && (
@@ -1078,22 +1156,25 @@ const ListPage: React.FC = () => {
           <DialogContent>
             <Stack spacing={2} mt={1}>
               <TextField
-                label="タイトル"
+                label="いきたいところ"
                 value={editPlace?.title || ""}
                 onChange={(e) => handleEditChange("title", e.target.value)}
                 fullWidth
+                placeholder="例: 東京タワー"
               />
               <TextField
-                label="メモ"
+                label="詳細 or メモ"
                 value={editPlace?.note || ""}
                 onChange={(e) => handleEditChange("note", e.target.value)}
                 fullWidth
+                placeholder="例: 展望台からの夜景が絶景で、特に冬のイルミネーションが美しい"
               />
               <TextField
-                label="URL"
+                label="GoogleMap or HP URL"
                 value={editPlace?.url || ""}
                 onChange={(e) => handleEditChange("url", e.target.value)}
                 fullWidth
+                placeholder="例: https://www.tokyotower.co.jp/"
               />
               <Select
                 value={editPlace?.member || ""}
@@ -1115,6 +1196,55 @@ const ListPage: React.FC = () => {
             </Button>
             <Button variant="contained" onClick={handleEditSave}>
               保存
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={isMemberDialogOpen}
+          onClose={() => setIsMemberDialogOpen(false)}
+          sx={{ "& .MuiDialog-paper": { margin: "auto", maxWidth: "400px" } }}
+        >
+          <DialogTitle>メンバー管理</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="メンバー名"
+              value={newMember}
+              onChange={(e) => setNewMember(e.target.value)}
+              fullWidth
+              placeholder="例: 山田太郎"
+            />
+            <List>
+              {members.map((member, index) => (
+                <ListItem
+                  key={index}
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary={member} />
+                  <Box>
+                    <IconButton
+                      onClick={() => handleEditMember(index)}
+                      color="primary"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDeleteMember(index)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsMemberDialogOpen(false)}>
+              キャンセル
+            </Button>
+            <Button variant="contained" onClick={handleAddOrEditMember}>
+              {editIndex !== null ? "保存" : "追加"}
             </Button>
           </DialogActions>
         </Dialog>

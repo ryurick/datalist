@@ -128,7 +128,14 @@ const Create: React.FC = () => {
               {error}
             </Alert>
           )}
-          <Box sx={{ mt: 3, mb: 3 }}>
+          <Box
+            sx={{
+              mt: 3,
+              mb: 3,
+              maxHeight: 200,
+              overflowY: "auto",
+            }}
+          >
             {members.map((member, index) => (
               <Box
                 key={index}

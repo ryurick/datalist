@@ -476,11 +476,11 @@ const ListPage: React.FC = () => {
         {/* 入力欄 */}
         <Box
           component="form"
-          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 0.5 }}
+          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 1 }}
         >
           <Stack spacing={1}>
             <TextField
-              label="行きたいところ"
+              label="行きたいところ・やりたいこと"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
@@ -488,6 +488,11 @@ const ListPage: React.FC = () => {
               required
               sx={{
                 bgcolor: "#ffffff",
+                "& .MuiInputBase-input": {
+                  height: "2em",
+                  padding: "6px 10px",
+                  fontSize: "0.9rem",
+                },
                 "& .MuiInputBase-input::placeholder": {
                   color: "rgba(0, 0, 0, 0.4)",
                 },
@@ -502,6 +507,11 @@ const ListPage: React.FC = () => {
               size="small"
               sx={{
                 bgcolor: "#ffffff",
+                "& .MuiInputBase-input": {
+                  height: "2em",
+                  padding: "6px 10px",
+                  fontSize: "0.9rem",
+                },
                 "& .MuiInputBase-input::placeholder": {
                   color: "rgba(0, 0, 0, 0.4)",
                 },
@@ -516,6 +526,11 @@ const ListPage: React.FC = () => {
               size="small"
               sx={{
                 bgcolor: "#ffffff",
+                "& .MuiInputBase-input": {
+                  height: "2em",
+                  padding: "6px 10px",
+                  fontSize: "0.9rem",
+                },
                 "& .MuiInputBase-input::placeholder": {
                   color: "rgba(0, 0, 0, 0.4)",
                 },
@@ -528,9 +543,18 @@ const ListPage: React.FC = () => {
               displayEmpty
               fullWidth
               size="small"
-              sx={{ bgcolor: "#ffffff" }}
+              sx={{
+                bgcolor: "#ffffff",
+                "& .MuiSelect-select": {
+                  height: "2em",
+                  padding: "6px 10px",
+                  fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
+                },
+              }}
             >
-              <MenuItem value="" disabled>
+              <MenuItem value="" disabled sx={{ textAlign: "center" }}>
                 メンバーを選択
               </MenuItem>
               {members.map((member, index) => (
@@ -543,8 +567,8 @@ const ListPage: React.FC = () => {
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
-                mb: 2,
-                gap: 2,
+                mb: 1,
+                gap: 1,
               }}
             >
               <Button
@@ -558,8 +582,10 @@ const ListPage: React.FC = () => {
                   },
                   fontFamily: "'Kosugi Maru', sans-serif",
                   fontWeight: "bold",
-                  fontSize: "1rem",
+                  fontSize: "0.9rem",
                   textTransform: "none",
+                  py: 0.5,
+                  px: 2,
                 }}
               >
                 メンバー管理
@@ -575,8 +601,10 @@ const ListPage: React.FC = () => {
                   },
                   fontFamily: "'Kosugi Maru', sans-serif",
                   fontWeight: "bold",
-                  fontSize: "1rem",
+                  fontSize: "0.9rem",
                   textTransform: "none",
+                  py: 0.5,
+                  px: 2,
                 }}
               >
                 追加
@@ -711,15 +739,12 @@ const ListPage: React.FC = () => {
                                 fontFamily: "'Kosugi Maru', sans-serif",
                               }}
                             >
-                              <Box sx={{ mb: 0.5 }}>
-                                {place.note && `${place.note}`}
-                              </Box>
+                              <Box sx={{}}>{place.note && `${place.note}`}</Box>
                               <Box
                                 sx={{
                                   display: "flex",
                                   justifyContent: "space-between",
                                   alignItems: "center",
-                                  mt: 0.25,
                                 }}
                               >
                                 <Box>

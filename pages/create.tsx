@@ -130,10 +130,9 @@ const Create: React.FC = () => {
           )}
           <Box
             sx={{
-              mt: 3,
-              mb: 3,
-              maxHeight: 200,
+              maxHeight: "100px",
               overflowY: "auto",
+              mb: 2,
             }}
           >
             {members.map((member, index) => (

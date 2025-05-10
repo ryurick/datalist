@@ -387,23 +387,34 @@ const ListPage: React.FC = () => {
     setEditIndex(null);
   };
 
-  const handleAddOrEditMember = () => {
+  const handleAddOrEditMember = async () => {
     if (newMember.trim() === "") {
       alert("メンバー名を入力してください。");
       return;
     }
 
+    let updatedMembers = [...members];
     if (editIndex !== null) {
       // 編集モード
-      const updatedMembers = [...members];
       updatedMembers[editIndex] = newMember;
-      setMembers(updatedMembers);
       setEditIndex(null);
     } else {
       // 追加モード
-      setMembers((prev) => [...prev, newMember]);
+      updatedMembers = [...members, newMember];
     }
 
+    // データベースを更新
+    const { error } = await supabase
+      .from("groups")
+      .update({ members: updatedMembers })
+      .eq("id", router.query.id);
+
+    if (error) {
+      console.error("Error updating members:", error);
+      return;
+    }
+
+    setMembers(updatedMembers);
     setNewMember("");
     setIsMemberDialogOpen(false);
   };

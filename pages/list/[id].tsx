@@ -28,8 +28,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import Layout from "../../components/Layout";
 import { useRouter } from "next/router";
+import { useSpring, animated } from "@react-spring/web";
 
 import { supabase } from "../../supabaseClient";
 
@@ -64,6 +67,12 @@ const ListPage: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState("");
   const [newMember, setNewMember] = useState("");
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const animationProps = useSpring({
+    maxHeight: isExpanded ? 500 : 0,
+    config: { duration: 800 }, // アニメーションの速度を調整
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -430,6 +439,10 @@ const ListPage: React.FC = () => {
     setMembers(updatedMembers);
   };
 
+  const toggleAccordion = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Layout>
       <Box
@@ -475,143 +488,163 @@ const ListPage: React.FC = () => {
 
         {/* 入力欄 */}
         <Box
-          component="form"
-          sx={{ mb: 1, border: "1px solid #ccc", borderRadius: 2, p: 1 }}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+            mb: 1,
+          }}
         >
-          <Stack spacing={1}>
-            <TextField
-              label="行きたいところ・やりたいこと"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              size="small"
-              required
-              sx={{
-                bgcolor: "#ffffff",
-                "& .MuiInputBase-input": {
-                  height: "2em",
-                  padding: "6px 10px",
-                  fontSize: "0.9rem",
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "rgba(0, 0, 0, 0.4)",
-                },
-              }}
-              placeholder="例: 京都金閣寺"
-            />
-            <TextField
-              label="コメント or 詳細 (任意)"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              fullWidth
-              size="small"
-              sx={{
-                bgcolor: "#ffffff",
-                "& .MuiInputBase-input": {
-                  height: "2em",
-                  padding: "6px 10px",
-                  fontSize: "0.9rem",
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "rgba(0, 0, 0, 0.4)",
-                },
-              }}
-              placeholder="例: 紅葉が最高！写真映えスポットだよ"
-            />
-            <TextField
-              label="GoogleMapUrl or HP URL (任意)"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              fullWidth
-              size="small"
-              sx={{
-                bgcolor: "#ffffff",
-                "& .MuiInputBase-input": {
-                  height: "2em",
-                  padding: "6px 10px",
-                  fontSize: "0.9rem",
-                },
-                "& .MuiInputBase-input::placeholder": {
-                  color: "rgba(0, 0, 0, 0.4)",
-                },
-              }}
-              placeholder="例: https://www.shokoku-ji.jp/kinkakuji/"
-            />
-            <Select
-              value={selectedMember}
-              onChange={(e) => setSelectedMember(e.target.value as string)}
-              displayEmpty
-              fullWidth
-              size="small"
-              sx={{
-                bgcolor: "#ffffff",
-                "& .MuiSelect-select": {
-                  height: "2em",
-                  padding: "6px 10px",
-                  fontSize: "0.9rem",
-                  display: "flex",
-                  alignItems: "center",
-                },
-              }}
-            >
-              <MenuItem value="" disabled sx={{ textAlign: "center" }}>
-                作成者を選択
-              </MenuItem>
-              {members.map((member, index) => (
-                <MenuItem key={index} value={member}>
-                  {member}
-                </MenuItem>
-              ))}
-            </Select>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 1,
-                gap: 1,
-              }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setIsMemberDialogOpen(true)}
-                sx={{
-                  bgcolor: "#a5d6a7",
-                  "&:hover": {
-                    bgcolor: "#81c784",
-                  },
-                  fontFamily: "'Kosugi Maru', sans-serif",
-                  fontWeight: "bold",
-                  fontSize: "0.9rem",
-                  textTransform: "none",
-                  py: 0.5,
-                  px: 2,
-                }}
-              >
-                メンバー管理
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddPlace}
-                sx={{
-                  bgcolor: "#a5d6a7",
-                  "&:hover": {
-                    bgcolor: "#81c784",
-                  },
-                  fontFamily: "'Kosugi Maru', sans-serif",
-                  fontWeight: "bold",
-                  fontSize: "0.9rem",
-                  textTransform: "none",
-                  py: 0.5,
-                  px: 2,
-                }}
-              >
-                追加
-              </Button>
-            </Box>
-          </Stack>
+          <IconButton onClick={toggleAccordion} sx={{ fontSize: "2rem" }}>
+            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </IconButton>
         </Box>
+        <animated.div style={{ overflow: "hidden", ...animationProps }}>
+          <Box
+            component="form"
+            sx={{
+              mb: 1,
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              p: 1,
+            }}
+          >
+            <Stack spacing={1}>
+              <TextField
+                label="行きたいところ・やりたいこと"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                fullWidth
+                size="small"
+                required
+                sx={{
+                  bgcolor: "#ffffff",
+                  "& .MuiInputBase-input": {
+                    height: "2em",
+                    padding: "6px 10px",
+                    fontSize: "0.9rem",
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    color: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+                placeholder="例: 京都金閣寺"
+              />
+              <TextField
+                label="コメント or 詳細 (任意)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                fullWidth
+                size="small"
+                sx={{
+                  bgcolor: "#ffffff",
+                  "& .MuiInputBase-input": {
+                    height: "2em",
+                    padding: "6px 10px",
+                    fontSize: "0.9rem",
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    color: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+                placeholder="例: 紅葉が最高！写真映えスポットだよ"
+              />
+              <TextField
+                label="GoogleMapUrl or HP URL (任意)"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                fullWidth
+                size="small"
+                sx={{
+                  bgcolor: "#ffffff",
+                  "& .MuiInputBase-input": {
+                    height: "2em",
+                    padding: "6px 10px",
+                    fontSize: "0.9rem",
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    color: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+                placeholder="例: https://www.shokoku-ji.jp/kinkakuji/"
+              />
+              <Select
+                value={selectedMember}
+                onChange={(e) => setSelectedMember(e.target.value as string)}
+                displayEmpty
+                fullWidth
+                size="small"
+                sx={{
+                  bgcolor: "#ffffff",
+                  "& .MuiSelect-select": {
+                    height: "2em",
+                    padding: "6px 10px",
+                    fontSize: "0.9rem",
+                    display: "flex",
+                    alignItems: "center",
+                  },
+                }}
+              >
+                <MenuItem value="" disabled sx={{ textAlign: "center" }}>
+                  作成者を選択
+                </MenuItem>
+                {members.map((member, index) => (
+                  <MenuItem key={index} value={member}>
+                    {member}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 1,
+                  gap: 1,
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setIsMemberDialogOpen(true)}
+                  sx={{
+                    bgcolor: "#a5d6a7",
+                    "&:hover": {
+                      bgcolor: "#81c784",
+                    },
+                    fontFamily: "'Kosugi Maru', sans-serif",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                    textTransform: "none",
+                    py: 0.5,
+                    px: 2,
+                  }}
+                >
+                  メンバー管理
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddPlace}
+                  sx={{
+                    bgcolor: "#a5d6a7",
+                    "&:hover": {
+                      bgcolor: "#81c784",
+                    },
+                    fontFamily: "'Kosugi Maru', sans-serif",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                    textTransform: "none",
+                    py: 0.5,
+                    px: 2,
+                  }}
+                >
+                  追加
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
+        </animated.div>
 
         {/* タブとリスト */}
         <Tabs

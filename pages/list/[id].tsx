@@ -1240,6 +1240,8 @@ const ListPage: React.FC = () => {
                 value={editPlace?.title || ""}
                 onChange={(e) => handleEditChange("title", e.target.value)}
                 fullWidth
+                multiline
+                rows={2}
                 placeholder="例: 東京タワー"
               />
               <TextField
@@ -1247,6 +1249,8 @@ const ListPage: React.FC = () => {
                 value={editPlace?.note || ""}
                 onChange={(e) => handleEditChange("note", e.target.value)}
                 fullWidth
+                multiline
+                rows={4}
                 placeholder="例: 展望台からの夜景が絶景で、特に冬のイルミネーションが美しい"
               />
               <TextField

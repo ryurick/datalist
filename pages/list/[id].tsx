@@ -47,6 +47,36 @@ type Place = {
   member: string; // メンバーを追加
 };
 
+// 共通のテキストスタイルを更新
+const commonTypographyStyle = {
+  primary: {
+    fontWeight: 600,
+    fontSize: "0.9rem",
+    color: "#1e3a5f",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    mb: 0.25,
+    fontFamily: "'Kosugi Maru', sans-serif",
+  },
+  secondary: {
+    fontSize: "0.8rem",
+    color: "#4a6785",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    fontFamily: "'Kosugi Maru', sans-serif",
+    display: "flex",
+    flexDirection: "column",
+    gap: 0.25,
+  },
+  url: {
+    fontFamily: "'Kosugi Maru', sans-serif",
+    color: "#4a6785",
+    textDecoration: "underline",
+  },
+};
+
 const ListPage: React.FC = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -233,26 +263,34 @@ const ListPage: React.FC = () => {
     e.stopPropagation();
     setCheckedAnimationIndex(index);
     const place = placesToVisit[index];
-    const updatedVisited = true;
 
     // データベースを更新
     const { error } = await supabase
       .from("places")
-      .update({ visited: updatedVisited })
+      .update({ visited: true })
       .eq("id", place.id);
 
     if (error) {
       console.error("Error updating visited status:", error);
+      setCheckedAnimationIndex(null); // エラー時にアニメーションをリセット
       return;
     }
 
-    // ローカルの状態を即時更新
+    // データを再取得して最新の状態を反映
+    const { data: placesData, error: placesError } = await supabase
+      .from("places")
+      .select("*")
+      .eq("groupid", router.query.id);
+
+    if (placesError) {
+      console.error("Error fetching places:", placesError);
+      return;
+    }
+
+    // アニメーション完了後にデータを更新
     setTimeout(() => {
-      const updated = [...placesToVisit];
-      const [moved] = updated.splice(index, 1);
-      moved.visited = updatedVisited;
-      setPlacesToVisit(updated);
-      setVisitedPlaces((prev) => [...prev, moved]);
+      setPlacesToVisit(placesData.filter((p) => !p.visited));
+      setVisitedPlaces(placesData.filter((p) => p.visited));
       setCheckedAnimationIndex(null);
       setOpenSnackbar(true);
     }, 800);
@@ -448,21 +486,93 @@ const ListPage: React.FC = () => {
     setIsExpanded(!isExpanded);
   };
 
+  // 共通のカードスタイルを関数化
+  const getCardStyle = (isVisited: boolean, isFavorite: boolean) => ({
+    borderRadius: "12px",
+    backgroundColor: isFavorite
+      ? "rgba(255, 248, 225, 0.6)" // お気に入り用の薄い黄色
+      : isVisited
+      ? "rgba(232, 245, 233, 0.6)" // 行った場所用の薄い緑
+      : "rgba(232, 245, 253, 0.6)", // 行きたい場所用の薄い青
+    backdropFilter: "blur(8px)",
+    border: "1px solid",
+    borderColor: isFavorite
+      ? "rgba(255, 213, 79, 0.5)" // お気に入り用のボーダー
+      : isVisited
+      ? "rgba(200, 230, 201, 0.5)" // 行った場所用のボーダー
+      : "rgba(200, 220, 240, 0.5)", // 行きたい場所用のボーダー
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+      backgroundColor: isFavorite
+        ? "rgba(255, 248, 225, 0.8)" // ホバー時の薄い黄色
+        : isVisited
+        ? "rgba(232, 245, 233, 0.8)" // ホバー時の薄い緑
+        : "rgba(232, 245, 253, 0.8)", // ホバー時の薄い青
+    },
+  });
+
+  // 共通のCardContentスタイルを更新
+  const commonCardContentStyle = {
+    py: 0.75,
+    px: 1.25,
+    "&:last-child": { pb: 0.75 },
+    height: "100%", // 高さを統一
+  };
+
+  // 共通のListItemスタイルを更新
+  const commonListItemStyle = {
+    py: 0,
+    px: 0,
+    gap: 1,
+    height: "100%", // 高さを統一
+  };
+
+  // すべてのタブで使用する共通のListItemTextコンポーネント
+  const CommonListItemText = ({ place }: { place: Place }) => (
+    <ListItemText
+      primary={
+        <Typography variant="body2" sx={commonTypographyStyle.primary}>
+          {place.title}
+        </Typography>
+      }
+      secondary={
+        <Box sx={commonTypographyStyle.secondary}>
+          <Box>{place.note}</Box>
+          {place.url && (
+            <Box>
+              <a
+                href={place.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={commonTypographyStyle.url}
+              >
+                URL
+              </a>
+            </Box>
+          )}
+        </Box>
+      }
+    />
+  );
+
   return (
     <Layout>
       <Box
         sx={{
           maxWidth: 800,
-          background: "linear-gradient(to bottom right, #e0f7fa, #f1f8e9)",
+          background: "linear-gradient(145deg, #ffffff, #f0f7ff)",
           mx: "auto",
-          height: "calc(100vh - 80px)",
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
-          px: 2,
-          py: 1,
-          bgcolor: "#f0f4f8",
-          borderRadius: 2,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+          px: 3,
+          py: 2,
+          boxShadow: "none",
+          position: "relative",
+          zIndex: 1,
+          overflow: "hidden",
         }}
       >
         {/* グループ名表示と編集 */}
@@ -503,7 +613,23 @@ const ListPage: React.FC = () => {
         >
           <Button
             onClick={toggleAccordion}
-            sx={{ fontSize: "1rem", display: "flex", alignItems: "center" }}
+            disableRipple
+            sx={{
+              fontSize: "1rem",
+              display: "flex",
+              alignItems: "center",
+              "&:focus": {
+                backgroundColor: "transparent",
+              },
+              "&:hover": {
+                backgroundColor: "transparent",
+              },
+              "&:active": {
+                backgroundColor: "transparent",
+              },
+              WebkitTapHighlightColor: "transparent",
+              userSelect: "none",
+            }}
           >
             {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             {isExpanded ? "隠す" : "表示"}
@@ -529,14 +655,15 @@ const ListPage: React.FC = () => {
                   size="small"
                   required
                   sx={{
-                    bgcolor: "#ffffff",
-                    "& .MuiInputBase-input": {
-                      height: "2em",
-                      padding: "6px 10px",
-                      fontSize: "0.9rem",
-                    },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: "rgba(0, 0, 0, 0.4)",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      backgroundColor: "rgba(255,255,255,0.8)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.95)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                      },
                     },
                   }}
                   placeholder="例: 京都金閣寺"
@@ -548,14 +675,15 @@ const ListPage: React.FC = () => {
                   fullWidth
                   size="small"
                   sx={{
-                    bgcolor: "#ffffff",
-                    "& .MuiInputBase-input": {
-                      height: "2em",
-                      padding: "6px 10px",
-                      fontSize: "0.9rem",
-                    },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: "rgba(0, 0, 0, 0.4)",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      backgroundColor: "rgba(255,255,255,0.8)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.95)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                      },
                     },
                   }}
                   placeholder="例: 紅葉が最高！写真映えスポットだよ"
@@ -567,14 +695,15 @@ const ListPage: React.FC = () => {
                   fullWidth
                   size="small"
                   sx={{
-                    bgcolor: "#ffffff",
-                    "& .MuiInputBase-input": {
-                      height: "2em",
-                      padding: "6px 10px",
-                      fontSize: "0.9rem",
-                    },
-                    "& .MuiInputBase-input::placeholder": {
-                      color: "rgba(0, 0, 0, 0.4)",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      backgroundColor: "rgba(255,255,255,0.8)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.95)",
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                      },
                     },
                   }}
                   placeholder="例: https://www.shokoku-ji.jp/kinkakuji/"
@@ -586,7 +715,6 @@ const ListPage: React.FC = () => {
                   fullWidth
                   size="small"
                   sx={{
-                    bgcolor: "#ffffff",
                     "& .MuiSelect-select": {
                       height: "2em",
                       padding: "6px 10px",
@@ -661,31 +789,42 @@ const ListPage: React.FC = () => {
         <Tabs
           value={tabIndex}
           onChange={handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="fullWidth"
+          centered
           sx={{
-            bgcolor: "#ffffff",
-            borderRadius: 1,
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            "& .MuiTab-root": {
-              fontFamily: "'Kosugi Maru', sans-serif",
-              fontWeight: "bold",
-              color: "#607d8b",
-              "&.Mui-selected": {
-                color: "#004d40",
-                bgcolor: "#a5d6a7",
-                borderRadius: 1,
-              },
+            mb: 1,
+            width: "100%",
+            mx: "auto",
+            "& .MuiTabs-flexContainer": {
+              justifyContent: "space-between",
+              mb: -1,
             },
             "& .MuiTabs-indicator": {
-              backgroundColor: "#004d40",
+              height: 3,
+              borderRadius: "3px",
+              backgroundColor: "#a5d6a7",
+            },
+            "& .MuiTab-root": {
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+              minHeight: "40px",
+              padding: "6px 8px",
+              minWidth: "auto",
+              flex: 1,
+              borderRadius: "12px",
+              color: "#666",
+              whiteSpace: "nowrap",
+              backgroundColor: "rgba(255, 255, 255, 0.5)",
+              "&.Mui-selected": {
+                color: "#2e7d32",
+                backgroundColor: "rgba(165, 214, 167, 0.1)",
+              },
             },
           }}
         >
-          <Tab label="行きたい場所" sx={{ fontSize: "0.85rem" }} />
-          <Tab label="行った場所" sx={{ fontSize: "0.85rem" }} />
-          <Tab label="お気に入り" sx={{ fontSize: "0.85rem" }} />
+          <Tab label="行きたい場所" />
+          <Tab label="行った場所" />
+          <Tab label="お気に入り" />
         </Tabs>
 
         <Box
@@ -693,122 +832,28 @@ const ListPage: React.FC = () => {
             flex: 1,
             overflowY: "auto",
             borderTop: "2px solid #ccc",
+            pb: 2,
           }}
         >
           {tabIndex === 0 && (
             <List>
               {placesToVisit.map((place, index) => (
-                <Collapse key={place.title} in={true} timeout={300}>
+                <Collapse
+                  key={place.id}
+                  in={true}
+                  timeout={500}
+                  sx={{
+                    mb: 0.75,
+                    transformOrigin: "top",
+                  }}
+                >
                   <Card
                     onClick={() => handleCardClick(place, index)}
-                    sx={{
-                      mb: 1,
-                      boxShadow: 2,
-                      backgroundColor: place.favorite
-                        ? "#fff8e1" // お気に入り（ゴールド系）
-                        : place.visited
-                        ? "#dcedc8" // 行った場所（グリーン）
-                        : "#fce4ec", // 行きたい場所（ピンク）
-                      cursor: "pointer",
-                      height: 80,
-                      borderLeft: place.favorite
-                        ? "5px solid #ffca28"
-                        : undefined,
-                      transition: "0.2s ease",
-                      "&:hover": {
-                        boxShadow: 4,
-                        transform: "translateY(-2px)",
-                      },
-                      "&:focus": {
-                        outline: "none",
-                        backgroundColor: place.favorite
-                          ? "#fff8e1"
-                          : place.visited
-                          ? "#dcedc8"
-                          : "#fce4ec",
-                      },
-                      "&:active": {
-                        backgroundColor: place.favorite
-                          ? "#ffe082"
-                          : place.visited
-                          ? "#c8e6c9"
-                          : "#f8bbd0",
-                      },
-                    }}
+                    sx={getCardStyle(false, place.favorite ?? false)}
                   >
-                    <CardContent
-                      sx={{
-                        py: 0.5,
-                        px: 1.5,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        height: "100%",
-                        fontFamily: "'Kosugi Maru', sans-serif",
-                      }}
-                    >
-                      <ListItem
-                        dense
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 1.5,
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: "bold",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                mb: 0.5,
-                                fontFamily: "'Kosugi Maru', sans-serif",
-                              }}
-                            >
-                              {place.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                fontFamily: "'Kosugi Maru', sans-serif",
-                              }}
-                            >
-                              <Box sx={{}}>{place.note && `${place.note}`}</Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Box>
-                                  {place.url && (
-                                    <a
-                                      href={place.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{
-                                        fontFamily: "'Kosugi Maru', sans-serif",
-                                      }}
-                                    >
-                                      URL
-                                    </a>
-                                  )}
-                                </Box>
-                              </Box>
-                            </Box>
-                          }
-                        />
+                    <CardContent sx={commonCardContentStyle}>
+                      <ListItem dense sx={commonListItemStyle}>
+                        <CommonListItemText place={place} />
                         <Box
                           sx={{
                             display: "flex",
@@ -880,287 +925,22 @@ const ListPage: React.FC = () => {
           {tabIndex === 1 && (
             <List>
               {visitedPlaces.map((place, index) => (
-                <Card
-                  onClick={() => handleCardClick(place, index)}
-                  key={index}
+                <Collapse
+                  key={place.id}
+                  in={true}
+                  timeout={500}
                   sx={{
-                    mb: 1,
-                    boxShadow: 2,
-                    backgroundColor: "#e8f5e9", // ナチュラルグリーン
-                    borderLeft: "6px solid #81c784", // グリーンアクセント
-                    cursor: "pointer",
-                    height: 80,
-                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: 4,
-                    },
-                    "&:focus": {
-                      outline: "none",
-                      backgroundColor: place.favorite
-                        ? "#fff8e1"
-                        : place.visited
-                        ? "#dcedc8"
-                        : "#fce4ec",
-                    },
-                    "&:active": {
-                      backgroundColor: place.favorite
-                        ? "#ffe082"
-                        : place.visited
-                        ? "#c8e6c9"
-                        : "#f8bbd0",
-                    },
+                    mb: 0.75,
+                    transformOrigin: "top",
                   }}
                 >
-                  <CardContent
-                    sx={{
-                      py: 0.5,
-                      px: 1.5,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      height: "100%",
-                      fontFamily: "'Kosugi Maru', sans-serif",
-                    }}
-                  >
-                    <ListItem
-                      dense
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 1.5,
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: "bold",
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              mb: 0.5,
-                              fontFamily: "'Kosugi Maru', sans-serif",
-                            }}
-                          >
-                            {place.title}
-                          </Typography>
-                        }
-                        secondary={
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              fontFamily: "'Kosugi Maru', sans-serif",
-                            }}
-                          >
-                            <Box sx={{ mb: 0.5 }}>
-                              {place.note && `${place.note}`}
-                            </Box>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                mt: 0.25,
-                              }}
-                            >
-                              <Box>
-                                {place.url && (
-                                  <a
-                                    href={place.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                      fontFamily: "'Kosugi Maru', sans-serif",
-                                    }}
-                                  >
-                                    URL
-                                  </a>
-                                )}
-                              </Box>
-                            </Box>
-                          </Box>
-                        }
-                      />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 0.25,
-                          minWidth: 80,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={(e) =>
-                              handleToggleFavorite(index, true, e)
-                            }
-                            disabled={true}
-                          >
-                            {place.favorite ? (
-                              <StarIcon color="warning" fontSize="medium" />
-                            ) : (
-                              <StarBorderIcon fontSize="medium" />
-                            )}
-                          </IconButton>
-                          <Checkbox
-                            size="medium"
-                            sx={{
-                              color: "defaultColor",
-                              "&.Mui-checked": {
-                                color: "#66bb6a",
-                              },
-                            }}
-                            checked={true}
-                            onClick={(e) => handleToggleUnvisited(index, e)}
-                          />
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          display="block"
-                          sx={{
-                            textAlign: "center",
-                            fontFamily: "'Kosugi Maru', sans-serif",
-                          }}
-                        >
-                          作成者: {place.member}
-                        </Typography>
-                      </Box>
-                    </ListItem>
-                  </CardContent>
-                </Card>
-              ))}
-            </List>
-          )}
-
-          {tabIndex === 2 && (
-            <List>
-              {[...placesToVisit, ...visitedPlaces]
-                .filter((place) => place.favorite)
-                .map((place, index) => (
                   <Card
                     onClick={() => handleCardClick(place, index)}
-                    key={index}
-                    sx={{
-                      mb: 1,
-                      boxShadow: 2,
-                      backgroundColor: "#fffde7", // 淡いイエローで柔らかく
-                      borderLeft: "6px solid #ffd54f", // ゴールド寄りのアクセント
-                      cursor: "pointer",
-                      height: 80,
-                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                      "&:hover": {
-                        transform: "translateY(-2px)",
-                        boxShadow: 4,
-                      },
-                      "&:focus": {
-                        outline: "none",
-                        backgroundColor: place.favorite
-                          ? "#fff8e1"
-                          : place.visited
-                          ? "#dcedc8"
-                          : "#fce4ec",
-                      },
-                      "&:active": {
-                        backgroundColor: place.favorite
-                          ? "#ffe082"
-                          : place.visited
-                          ? "#c8e6c9"
-                          : "#f8bbd0",
-                      },
-                    }}
+                    sx={getCardStyle(true, place.favorite ?? false)}
                   >
-                    <CardContent
-                      sx={{
-                        py: 0.5,
-                        px: 1.5,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        height: "100%",
-                        fontFamily: "'Kosugi Maru', sans-serif",
-                      }}
-                    >
-                      <ListItem
-                        dense
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 1.5,
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: "bold",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                mb: 0.5,
-                                fontFamily: "'Kosugi Maru', sans-serif",
-                              }}
-                            >
-                              {place.title}
-                            </Typography>
-                          }
-                          secondary={
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                fontFamily: "'Kosugi Maru', sans-serif",
-                              }}
-                            >
-                              <Box sx={{ mb: 0.5 }}>
-                                {place.note && `${place.note}`}
-                              </Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                  mt: 0.25,
-                                }}
-                              >
-                                <Box>
-                                  {place.url && (
-                                    <a
-                                      href={place.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{
-                                        fontFamily: "'Kosugi Maru', sans-serif",
-                                      }}
-                                    >
-                                      URL
-                                    </a>
-                                  )}
-                                </Box>
-                              </Box>
-                            </Box>
-                          }
-                        />
+                    <CardContent sx={commonCardContentStyle}>
+                      <ListItem dense sx={commonListItemStyle}>
+                        <CommonListItemText place={place} />
                         <Box
                           sx={{
                             display: "flex",
@@ -1181,8 +961,9 @@ const ListPage: React.FC = () => {
                             <IconButton
                               size="small"
                               onClick={(e) =>
-                                handleToggleFavorite(index, place.visited, e)
+                                handleToggleFavorite(index, true, e)
                               }
+                              disabled={true}
                             >
                               {place.favorite ? (
                                 <StarIcon color="warning" fontSize="medium" />
@@ -1190,6 +971,17 @@ const ListPage: React.FC = () => {
                                 <StarBorderIcon fontSize="medium" />
                               )}
                             </IconButton>
+                            <Checkbox
+                              size="medium"
+                              sx={{
+                                color: "defaultColor",
+                                "&.Mui-checked": {
+                                  color: "#66bb6a",
+                                },
+                              }}
+                              checked={true}
+                              onClick={(e) => handleToggleUnvisited(index, e)}
+                            />
                           </Box>
                           <Typography
                             variant="caption"
@@ -1205,6 +997,77 @@ const ListPage: React.FC = () => {
                       </ListItem>
                     </CardContent>
                   </Card>
+                </Collapse>
+              ))}
+            </List>
+          )}
+
+          {tabIndex === 2 && (
+            <List>
+              {[...placesToVisit, ...visitedPlaces]
+                .filter((place) => place.favorite)
+                .map((place, index) => (
+                  <Collapse
+                    key={place.id}
+                    in={true}
+                    timeout={500}
+                    sx={{
+                      mb: 0.75,
+                      transformOrigin: "top",
+                    }}
+                  >
+                    <Card
+                      onClick={() => handleCardClick(place, index)}
+                      sx={getCardStyle(place.visited, place.favorite ?? false)}
+                    >
+                      <CardContent sx={commonCardContentStyle}>
+                        <ListItem dense sx={commonListItemStyle}>
+                          <CommonListItemText place={place} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: 0.25,
+                              minWidth: 80,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 0.5,
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={(e) =>
+                                  handleToggleFavorite(index, place.visited, e)
+                                }
+                              >
+                                {place.favorite ? (
+                                  <StarIcon color="warning" fontSize="medium" />
+                                ) : (
+                                  <StarBorderIcon fontSize="medium" />
+                                )}
+                              </IconButton>
+                            </Box>
+                            <Typography
+                              variant="caption"
+                              display="block"
+                              sx={{
+                                textAlign: "center",
+                                fontFamily: "'Kosugi Maru', sans-serif",
+                              }}
+                            >
+                              作成者: {place.member}
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                      </CardContent>
+                    </Card>
+                  </Collapse>
                 ))}
             </List>
           )}
@@ -1230,7 +1093,13 @@ const ListPage: React.FC = () => {
         <Dialog
           open={editPlace !== null}
           onClose={() => setEditPlace(null)}
-          sx={{ "& .MuiDialog-paper": { margin: "auto", maxWidth: "600px" } }}
+          sx={{
+            "& .MuiDialog-paper": {
+              borderRadius: "20px",
+              padding: "16px",
+              boxShadow: "0 24px 48px rgba(0,0,0,0.1)",
+            },
+          }}
         >
           <DialogTitle>編集</DialogTitle>
           <DialogContent>

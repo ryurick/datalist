@@ -576,7 +576,12 @@ const ListPage: React.FC = () => {
         }}
       >
         {/* グループ名表示と編集 */}
-        <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           {isEditingGroupName ? (
             <TextField
               value={groupName}
@@ -608,16 +613,17 @@ const ListPage: React.FC = () => {
             justifyContent: "center",
             alignItems: "center",
             cursor: "pointer",
-            mb: 1,
+            mb: 0.25,
           }}
         >
           <Button
             onClick={toggleAccordion}
             disableRipple
             sx={{
-              fontSize: "1rem",
+              fontSize: "0.9rem",
               display: "flex",
               alignItems: "center",
+              py: 0,
               "&:focus": {
                 backgroundColor: "transparent",
               },
@@ -833,6 +839,18 @@ const ListPage: React.FC = () => {
             overflowY: "auto",
             borderTop: "2px solid #ccc",
             pb: 2,
+            pr: 2, // 右側にパディングを追加
+            "&::-webkit-scrollbar": {
+              // スクロールバーのスタイリング
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "rgba(0, 0, 0, 0.1)",
+              borderRadius: "4px",
+            },
           }}
         >
           {tabIndex === 0 && (

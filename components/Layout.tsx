@@ -82,21 +82,6 @@ const Layout: React.FC<PropsWithChildren> = ({ children }) => {
       >
         {children}
       </Box>
-
-      <Box
-        component="footer"
-        py={2}
-        textAlign="center"
-        bgcolor="#e0e0e0"
-        sx={{
-          fontFamily: "'Yomogi', cursive",
-          flexShrink: 0,
-        }}
-      >
-        <Typography variant="body2" color="textSecondary">
-          © 2025 GoList
-        </Typography>
-      </Box>
     </Box>
   );
 };
